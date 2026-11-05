@@ -1,0 +1,8 @@
+name = "yl-newtab"
+main = "worker.js"
+compatibility_date = "2024-03-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "newtab-d1"
+database_id = "65df2786-5445-4569-bd67-ebc8ddb0a310"

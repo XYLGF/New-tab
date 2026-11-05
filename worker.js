@@ -48,7 +48,6 @@ const HTML_CONTENT = `
   .card svg { width: 40px; height: 40px; stroke: var(--text); fill: none; stroke-width: 1.5; }
   .card span { font-size: 13px; font-weight: 600; margin-top: 8px; }
 
-  /* 弹窗 */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 100; }
   .modal-overlay.active { display: flex; }
   .modal { background: #fff; border: 2px solid var(--line); width: 100%; max-width: 440px; padding: 30px; box-shadow: 10px 10px 0 rgba(0,0,0,0.05); position: relative; }
@@ -62,7 +61,6 @@ const HTML_CONTENT = `
   .setting-item button:hover { background: var(--line); color: #fff; }
   .setting-item input { width: 140px; text-align: right; }
 
-  /* 通用弹窗输入 */
   .prompt-input { width: 100%; border: 2px solid var(--line); padding: 12px; font-size: 16px; outline: none; margin-bottom: 20px; font-family: inherit; }
   .btn-primary { width: 100%; padding: 12px; border: 2px solid var(--line); background: var(--line); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
 </style>
@@ -152,9 +150,7 @@ const HTML_CONTENT = `
   let historyList = JSON.parse(localStorage.getItem('yl_history')) || [];
   let promptCallback = null;
 
-  // === 1. 初始化与登录判断 ===
   async function init() {
-    // 如果 URL 上带了 token，说明是从 SSO 登录跳回来的
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const username = urlParams.get('username');
@@ -180,7 +176,7 @@ const HTML_CONTENT = `
     
     const bg = localStorage.getItem('yl_bg');
     if (bg) {
-      document.body.style.backgroundImage = `url(${bg})`;
+      document.body.style.backgroundImage = \`url(\${bg})\`;
       document.body.classList.add('has-bg');
     }
   }
@@ -196,7 +192,6 @@ const HTML_CONTENT = `
     }
   }
 
-  // === 2. 云端同步核心逻辑 ===
   async function loadFromCloud() {
     try {
       const res = await fetch(\`\${API_BASE}/api/sync?email=\${encodeURIComponent(userEmail)}\`);
@@ -213,7 +208,7 @@ const HTML_CONTENT = `
 
   async function syncCloud() {
     saveLocal();
-    if (!userEmail) return; // 没登录只存本地
+    if (!userEmail) return; 
     try {
       await fetch(\`\${API_BASE}/api/sync\`, {
         method: "POST",
@@ -229,7 +224,6 @@ const HTML_CONTENT = `
     localStorage.setItem('yl_history', JSON.stringify(historyList));
   }
 
-  // === 3. 界面交互事件 ===
   function toggleModal(id, show) {
     const el = document.getElementById(id);
     if (show) el.classList.add('active');
@@ -274,20 +268,18 @@ const HTML_CONTENT = `
     reader.onload = (ev) => {
       const base64 = ev.target.result;
       localStorage.setItem('yl_bg', base64);
-      document.body.style.backgroundImage = `url(${base64})`;
+      document.body.style.backgroundImage = \`url(\${base64})\`;
       document.body.classList.add('has-bg');
-      // 注意：Base64 的壁纸体积太大，通常不建议存 D1，所以这里只存本地
     };
     reader.readAsDataURL(file);
   }
 
-  // 搜索
   function doSearch() {
     const q = document.getElementById('search-input').value.trim();
     if (!q) return;
     historyList.unshift({ query: q, time: new Date().toLocaleString() });
     if (historyList.length > 50) historyList.pop();
-    syncCloud(); // 存云端
+    syncCloud(); 
     window.location.href = settings.engineUrl + encodeURIComponent(q);
   }
 
@@ -295,7 +287,6 @@ const HTML_CONTENT = `
     if (e.key === 'Enter') doSearch();
   });
 
-  // 收藏
   function addBookmark() {
     showPrompt("添加收藏", "", true, "添加");
     promptCallback = () => {
@@ -313,10 +304,10 @@ const HTML_CONTENT = `
     if (bookmarks.length === 0) return showPrompt("我的收藏", "<p style='color:#888;'>暂无收藏，点击主页的 '+' 添加。</p>", false);
     let html = "";
     bookmarks.forEach((b, i) => {
-      html += `<div style="border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between;">
-        <a href="${b.url}" style="color: #333; text-decoration: none; font-weight: bold;">${b.name}</a>
-        <button onclick="delBookmark(${i})" style="color: red; background: none; border: none; cursor: pointer;">删除</button>
-      </div>`;
+      html += \`<div style="border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between;">
+        <a href="\${b.url}" style="color: #333; text-decoration: none; font-weight: bold;">\${b.name}</a>
+        <button onclick="delBookmark(\${i})" style="color: red; background: none; border: none; cursor: pointer;">删除</button>
+      </div>\`;
     });
     showPrompt("我的收藏", html, false);
   }
@@ -327,15 +318,14 @@ const HTML_CONTENT = `
     openBookmarks();
   }
 
-  // 历史记录
   function openHistory() {
     if (historyList.length === 0) return showPrompt("历史记录", "<p style='color:#888;'>暂无搜索记录。</p>", false);
     let html = "";
     historyList.forEach(h => {
-      html += `<div style="border-bottom: 1px solid #eee; padding: 10px 0;">
-        <span style="font-weight: bold;">${h.query}</span>
-        <span style="float: right; color: #888; font-size: 12px;">${h.time}</span>
-      </div>`;
+      html += \`<div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+        <span style="font-weight: bold;">\${h.query}</span>
+        <span style="float: right; color: #888; font-size: 12px;">\${h.time}</span>
+      </div>\`;
     });
     showPrompt("历史记录", html, false);
   }
@@ -394,7 +384,6 @@ export default {
       }
     }
 
-    // 返回前端页面
     return new Response(HTML_CONTENT, {
       headers: { "Content-Type": "text/html; charset=utf-8" }
     });
